@@ -65,28 +65,64 @@
       <div id="result" class="result-section"></div>
     </div>
   </div>
-  <!-- Eng tez yuz aniqlash uchun Mediapipe JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script>
-    // Demo uchun baholash (FaceMesh bilan haqiqiy baholash qilish mumkin, hozircha 100)
-    function rateFace(box) {
+    // Yuz baholash algoritmi (ko'zlar, burun, og'iz, simmetriya)
+    function rateFace(landmarks) {
+      // Ko'zlar o'rtasidagi masofa / yuz eni
+      const leftEye = landmarks[33]; // chap ko'z tashqarisi
+      const rightEye = landmarks[263]; // o'ng ko'z tashqarisi
+      const eyeDist = Math.hypot(rightEye.x - leftEye.x, rightEye.y - leftEye.y);
+
+      // Yuz eni (chap va o'ng quloq oralig'i)
+      const faceLeft = landmarks[234];
+      const faceRight = landmarks[454];
+      const faceWidth = Math.hypot(faceRight.x - faceLeft.x, faceRight.y - faceLeft.y);
+
+      const eyeRatio = eyeDist / faceWidth;
+      const eyeScore = Math.max(0, 100 - Math.abs(eyeRatio - 0.38) * 400);
+
+      // Burun uzunligi (yuz vertikali)
+      const noseTop = landmarks[168];
+      const noseBottom = landmarks[2];
+      const chin = landmarks[152];
+      const faceHeight = Math.hypot(chin.x - noseTop.x, chin.y - noseTop.y);
+      const noseLength = Math.hypot(noseBottom.x - noseTop.x, noseBottom.y - noseTop.y);
+      const noseRatio = noseLength / faceHeight;
+      const noseScore = Math.max(0, 100 - Math.abs(noseRatio - 0.37) * 480);
+
+      // Og'iz kengligi
+      const mouthLeft = landmarks[61];
+      const mouthRight = landmarks[291];
+      const mouthWidth = Math.hypot(mouthRight.x - mouthLeft.x, mouthRight.y - mouthLeft.y);
+      const mouthRatio = mouthWidth / faceWidth;
+      const mouthScore = Math.max(0, 100 - Math.abs(mouthRatio - 0.43) * 350);
+
+      // Simmetriya: chap va o'ng ko'z balandliklari
+      const symScore = Math.max(0, 100 - Math.abs(landmarks[33].y - landmarks[263].y) * 800);
+
+      // Umumiy baho
+      const overall = Math.round((eyeScore + noseScore + mouthScore + symScore) / 4);
+
       return {
-        eyeScore: 100,
-        noseScore: 100,
-        mouthScore: 100,
-        symScore: 100,
-        overall: 100
+        eyeScore: Math.round(eyeScore),
+        noseScore: Math.round(noseScore),
+        mouthScore: Math.round(mouthScore),
+        symScore: Math.round(symScore),
+        overall
       };
     }
 
-    // Mediapipe yuz aniqlash
-    const faceDetection = new FaceDetection.FaceDetection({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`
+    // Mediapipe FaceMesh sozlash
+    const faceMesh = new FaceMesh.FaceMesh({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
     });
-    faceDetection.setOptions({
-      model: 'short',
-      minDetectionConfidence: 0.5
+    faceMesh.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
     });
 
     const fileInput = document.getElementById('faceInput');
@@ -110,15 +146,15 @@
         canvas.width = img.width;
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
-        faceDetection.send({image: img});
+        faceMesh.send({image: img});
       };
       img.src = URL.createObjectURL(file);
-      return false; // Qo'shimcha kafolat uchun
+      return false;
     });
 
-    faceDetection.onResults((results) => {
+    faceMesh.onResults((results) => {
       loading.style.display = 'none';
-      if (!results.detections || results.detections.length === 0) {
+      if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
         resultDiv.innerHTML =
         `<div class="alert alert-danger animate__animated animate__bounceIn">
           <b>Rasmda yuz yo'q!</b><br>Yuz aniqlanmadi. Iltimos, aniq yuzli rasm yuklang.
@@ -126,14 +162,14 @@
         return;
       }
 
-      // Birinchi yuz uchun (bir nechta bo'lsa, loop qilsa bo'ladi)
-      const detection = results.detections[0];
+      const landmarks = results.multiFaceLandmarks[0];
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
-      DrawingUtils.drawRectangle(ctx, detection.boundingBox, {color: 'lime', lineWidth: 4});
+      DrawingUtils.drawConnectors(ctx, landmarks, FaceMesh.FACEMESH_TESSELATION, {color: '#00FF00', lineWidth: 1});
+      DrawingUtils.drawConnectors(ctx, landmarks, FaceMesh.FACEMESH_CONTOURS, {color: '#FF3030', lineWidth: 1});
 
       const imgSrc = canvas.toDataURL();
-      const scores = rateFace(detection.boundingBox);
+      const scores = rateFace(landmarks);
 
       resultDiv.innerHTML = `
         <div class="text-center">
