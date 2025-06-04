@@ -4,13 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Face Analyzer</title>
-
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
-
-  <!-- face-api.js CDN -->
   <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
-
   <style>
     * {
       box-sizing: border-box;
@@ -82,11 +77,15 @@
       margin-bottom: 1.5rem;
       display: flex;
       justify-content: center;
+      align-items: center;
     }
-    #inputImage {
+    #inputImage, #overlay {
       max-width: 100%;
       border-radius: 15px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    #inputImage {
+      display: none;
     }
     #overlay {
       position: absolute;
@@ -158,19 +157,13 @@
       <button class="btn">Yuz Rasmini Tanlash</button>
       <input type="file" id="imageUpload" accept="image/*" />
     </div>
-
     <div id="preview-wrapper">
       <img id="inputImage" src="" alt="Uploaded Face" />
       <canvas id="overlay"></canvas>
     </div>
-
-    <div class="results" id="results">
-      <!-- Natijalar shu yerdan paydo bo‘ladi -->
-    </div>
+    <div class="results" id="results"></div>
   </div>
-
   <script>
-    // Kutubxonani yuklash tugagach ishga tushadi
     Promise.all([
       faceapi.nets.ssdMobilenetv1.loadFromUri('models'),
       faceapi.nets.faceLandmark68Net.loadFromUri('models')
@@ -184,77 +177,58 @@
 
       imageUpload.addEventListener('change', async () => {
         if (!imageUpload.files || !imageUpload.files[0]) return;
-
-        // Rasmini o‘qib, <img> ga o‘rnatish
         const file = imageUpload.files[0];
         const reader = new FileReader();
+
+        resultsDiv.innerHTML = '<div class="result-card"><h3>Yuklanmoqda...</h3></div>';
         reader.onload = () => {
           inputImage.src = reader.result;
+          inputImage.style.display = 'block';
         };
         reader.readAsDataURL(file);
 
         inputImage.onload = async () => {
-          // Canvas o‘lchamini rasmga moslash
           overlay.width = inputImage.width;
           overlay.height = inputImage.height;
-
-          // Ekrandagi eski natijalarni tozalash
           resultsDiv.innerHTML = '';
 
-          // Yuzni aniqlash va landmarklarni olish
           const detection = await faceapi
             .detectSingleFace(inputImage, new faceapi.SsdMobilenetv1Options())
             .withFaceLandmarks();
 
           if (!detection) {
-            resultsDiv.innerHTML = `
-              <div class="result-card">
-                <h3>Yuz topilmadi, iltimos aniqlik yuqori rasm yuklang.</h3>
-              </div>`;
+            inputImage.style.display = 'none';
+            overlay.width = 0;
+            overlay.height = 0;
+            resultsDiv.innerHTML = '<div class="result-card"><h3>Yuz topilmadi. Iltimos, aniq rasm tanlang.</h3></div>';
             return;
           }
 
-          // Landmarklarni chizish
           const ctx = overlay.getContext('2d');
           ctx.clearRect(0, 0, overlay.width, overlay.height);
           faceapi.draw.drawFaceLandmarks(overlay, detection);
 
-          // Baholarni hisoblash
           const box = detection.detection.box;
           const landmarks = detection.landmarks;
 
-          // 1. Eyes (ko‘zlar)
-          const leftEyePts = landmarks.getLeftEye();
-          const rightEyePts = landmarks.getRightEye();
-          const leftEyeCenter = centerPoint(leftEyePts);
-          const rightEyeCenter = centerPoint(rightEyePts);
+          const leftEyeCenter = centerPoint(landmarks.getLeftEye());
+          const rightEyeCenter = centerPoint(landmarks.getRightEye());
           const eyeDistance = distance(leftEyeCenter, rightEyeCenter);
-          const eyeRatio = eyeDistance / box.width; // yuz kengligiga nisbati
-          const idealEyeRatio = 0.46; // taxminiy ideal nisbati
-          let eyeScore = Math.max(0, Math.min(100, (1 - Math.abs(eyeRatio - idealEyeRatio) / 0.2) * 100));
+          const eyeRatio = eyeDistance / box.width;
+          const eyeScore = Math.max(0, Math.min(100, (1 - Math.abs(eyeRatio - 0.46) / 0.2) * 100));
 
-          // 2. Nose (burun)
           const nosePts = landmarks.getNose();
-          const noseLeft = nosePts[0];
-          const noseRight = nosePts[6];
-          const noseWidth = distance(noseLeft, noseRight);
+          const noseWidth = distance(nosePts[0], nosePts[6]);
           const noseRatio = noseWidth / box.width;
-          const idealNoseRatio = 0.33;
-          let noseScore = Math.max(0, Math.min(100, (1 - Math.abs(noseRatio - idealNoseRatio) / 0.15) * 100));
+          const noseScore = Math.max(0, Math.min(100, (1 - Math.abs(noseRatio - 0.33) / 0.15) * 100));
 
-          // 3. Mouth (lab)
           const mouthPts = landmarks.getMouth();
-          const mouthLeft = mouthPts[0];
-          const mouthRight = mouthPts[6];
-          const mouthWidth = distance(mouthLeft, mouthRight);
+          const mouthWidth = distance(mouthPts[0], mouthPts[6]);
           const mouthRatio = mouthWidth / box.width;
-          const idealMouthRatio = 0.5;
-          let mouthScore = Math.max(0, Math.min(100, (1 - Math.abs(mouthRatio - idealMouthRatio) / 0.2) * 100));
+          const mouthScore = Math.max(0, Math.min(100, (1 - Math.abs(mouthRatio - 0.5) / 0.2) * 100));
 
-          // Umumiy baho (o‘rtacha)
           const overallScore = ((eyeScore + noseScore + mouthScore) / 3).toFixed(1);
 
-          // Natijalarni ekranga chiqarish
           addResult('Ko‘zlar (Eyes)', eyeScore.toFixed(1));
           addResult('Burun (Nose)', noseScore.toFixed(1));
           addResult('Lab (Mouth)', mouthScore.toFixed(1));
@@ -265,22 +239,15 @@
         };
       });
 
-      // Landmark punktlaridan markaz nuqtani olish
       function centerPoint(points) {
-        const sum = points.reduce((acc, pt) => {
-          return { x: acc.x + pt.x, y: acc.y + pt.y };
-        }, { x: 0, y: 0 });
+        const sum = points.reduce((acc, pt) => ({ x: acc.x + pt.x, y: acc.y + pt.y }), { x: 0, y: 0 });
         return { x: sum.x / points.length, y: sum.y / points.length };
       }
 
-      // Distansiya hisoblash
       function distance(p1, p2) {
-        const dx = p1.x - p2.x;
-        const dy = p1.y - p2.y;
-        return Math.sqrt(dx * dx + dy * dy);
+        return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
       }
 
-      // Har bir qism uchun natija kartasini yaratish
       function addResult(label, score) {
         const card = document.createElement('div');
         card.className = 'result-card';
