@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yuz Baholash</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px #000;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid #00f2fe;
+      border-radius: 20px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+      backdrop-filter: blur(10px);
+    }
+    .input-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    input[type="file"] {
+      padding: 0.5rem;
+      border: none;
+      background: #00f2fe;
+      color: black;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    button {
+      background: #7ef9ff;
+      color: black;
+      border: none;
+      border-radius: 10px;
+      padding: 0.7rem 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #00f2fe;
+      transform: scale(1.05);
+    }
+    .ratings {
+      margin-top: 1.5rem;
+      font-size: 1.2em;
+      line-height: 2em;
+    }
+    .highlight {
+      color: #00f2fe;
+      font-weight: bold;
+    }
+    img.preview {
+      margin-top: 1rem;
+      max-width: 100%;
+      border-radius: 15px;
+      border: 2px solid #00f2fe;
+    }
+  </style>
+</head>
+<body>
+  <h1>Yuz Baholash AI</h1>
+  <div class="card">
+    <div class="input-section">
+      <input type="file" accept="image/*" id="imageInput">
+      <button onclick="evaluateFace()">Bahola</button>
+    </div>
+    <img id="preview" class="preview" src="" hidden>
+    <div class="ratings" id="ratings" hidden>
+      <div>Ko‘zlar: <span class="highlight" id="eyesScore"></span>/10</div>
+      <div>Burun: <span class="highlight" id="noseScore"></span>/10</div>
+      <div>Og‘iz: <span class="highlight" id="mouthScore"></span>/10</div>
+      <div>Yonoqlar: <span class="highlight" id="cheekScore"></span>/10</div>
+      <div>Yuz shakli: <span class="highlight" id="faceShapeScore"></span>/10</div>
+      <hr>
+      <div>Umumiy baho: <span class="highlight" id="totalScore"></span>/50</div>
+    </div>
+  </div>
+
+  <script>
+    function randomScore() {
+      return Math.floor(Math.random() * 6) + 5; // 5 dan 10 gacha
+    }
+
+    function evaluateFace() {
+      const fileInput = document.getElementById('imageInput');
+      const preview = document.getElementById('preview');
+      const ratings = document.getElementById('ratings');
+
+      if (fileInput.files.length === 0) {
+        alert("Iltimos, rasm tanlang!");
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.hidden = false;
+
+        const eyes = randomScore();
+        const nose = randomScore();
+        const mouth = randomScore();
+        const cheeks = randomScore();
+        const faceShape = randomScore();
+
+        document.getElementById('eyesScore').textContent = eyes;
+        document.getElementById('noseScore').textContent = nose;
+        document.getElementById('mouthScore').textContent = mouth;
+        document.getElementById('cheekScore').textContent = cheeks;
+        document.getElementById('faceShapeScore').textContent = faceShape;
+
+        const total = eyes + nose + mouth + cheeks + faceShape;
+        document.getElementById('totalScore').textContent = total;
+
+        ratings.hidden = false;
+      };
+
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
