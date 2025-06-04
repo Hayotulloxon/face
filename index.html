@@ -1,141 +1,310 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yuz Baholash</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Face Analyzer</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
+
+  <!-- face-api.js CDN -->
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+
   <style>
-    body {
+    * {
+      box-sizing: border-box;
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-      color: white;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #4B79A1, #283E51);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .container {
+      background: #ffffff;
+      color: #333;
+      width: 90%;
+      max-width: 900px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 100vh;
+      padding: 2rem;
     }
     h1 {
-      font-size: 3em;
-      margin-bottom: 10px;
-      text-shadow: 2px 2px #000;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #333;
+      text-align: center;
     }
-    .card {
-      background: rgba(255, 255, 255, 0.1);
-      border: 2px solid #00f2fe;
-      border-radius: 20px;
-      padding: 2rem;
-      width: 90%;
+    .upload-btn {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+    }
+    .upload-btn input[type="file"] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+      height: 100%;
+      width: 100%;
+    }
+    .btn {
+      background: linear-gradient(135deg, #FF8A00, #E52E71);
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    #preview-wrapper {
+      position: relative;
+      width: 100%;
       max-width: 600px;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-      backdrop-filter: blur(10px);
-    }
-    .input-section {
+      margin-bottom: 1.5rem;
       display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-bottom: 2rem;
+      justify-content: center;
     }
-    input[type="file"] {
-      padding: 0.5rem;
-      border: none;
-      background: #00f2fe;
-      color: black;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-    button {
-      background: #7ef9ff;
-      color: black;
-      border: none;
-      border-radius: 10px;
-      padding: 0.7rem 1.5rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #00f2fe;
-      transform: scale(1.05);
-    }
-    .ratings {
-      margin-top: 1.5rem;
-      font-size: 1.2em;
-      line-height: 2em;
-    }
-    .highlight {
-      color: #00f2fe;
-      font-weight: bold;
-    }
-    img.preview {
-      margin-top: 1rem;
+    #inputImage {
       max-width: 100%;
       border-radius: 15px;
-      border: 2px solid #00f2fe;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .results {
+      width: 100%;
+      margin-top: 1rem;
+    }
+    .result-card {
+      background: #fafafa;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 1rem 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .result-card h3 {
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: #444;
+    }
+    .score-bar {
+      position: relative;
+      width: 60%;
+      height: 12px;
+      background: #e0e0e0;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-left: 1rem;
+    }
+    .score-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: linear-gradient(135deg, #FF8A00, #E52E71);
+      border-radius: 6px;
+      transition: width 0.6s ease;
+    }
+    .score-text {
+      font-weight: 600;
+      margin-left: 1rem;
+      width: 50px;
+      text-align: right;
+      color: #444;
+    }
+    .overall {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-top: 1rem;
+      color: #E52E71;
+    }
+    @media (max-width: 600px) {
+      .score-bar {
+        width: 50%;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Yuz Baholash AI</h1>
-  <div class="card">
-    <div class="input-section">
-      <input type="file" accept="image/*" id="imageInput">
-      <button onclick="evaluateFace()">Bahola</button>
+  <div class="container">
+    <h1>Face Analyzer</h1>
+    <div class="upload-btn">
+      <button class="btn">Yuz Rasmini Tanlash</button>
+      <input type="file" id="imageUpload" accept="image/*" />
     </div>
-    <img id="preview" class="preview" src="" hidden>
-    <div class="ratings" id="ratings" hidden>
-      <div>Ko‘zlar: <span class="highlight" id="eyesScore"></span>/10</div>
-      <div>Burun: <span class="highlight" id="noseScore"></span>/10</div>
-      <div>Og‘iz: <span class="highlight" id="mouthScore"></span>/10</div>
-      <div>Yonoqlar: <span class="highlight" id="cheekScore"></span>/10</div>
-      <div>Yuz shakli: <span class="highlight" id="faceShapeScore"></span>/10</div>
-      <hr>
-      <div>Umumiy baho: <span class="highlight" id="totalScore"></span>/50</div>
+
+    <div id="preview-wrapper">
+      <img id="inputImage" src="" alt="Uploaded Face" />
+      <canvas id="overlay"></canvas>
+    </div>
+
+    <div class="results" id="results">
+      <!-- Natijalar shu yerdan paydo bo‘ladi -->
     </div>
   </div>
 
   <script>
-    function randomScore() {
-      return Math.floor(Math.random() * 6) + 5; // 5 dan 10 gacha
-    }
+    // Kutubxonani yuklash tugagach ishga tushadi
+    Promise.all([
+      faceapi.nets.ssdMobilenetv1.loadFromUri('models'),
+      faceapi.nets.faceLandmark68Net.loadFromUri('models')
+    ]).then(start);
 
-    function evaluateFace() {
-      const fileInput = document.getElementById('imageInput');
-      const preview = document.getElementById('preview');
-      const ratings = document.getElementById('ratings');
+    function start() {
+      const imageUpload = document.getElementById('imageUpload');
+      const inputImage = document.getElementById('inputImage');
+      const overlay = document.getElementById('overlay');
+      const resultsDiv = document.getElementById('results');
 
-      if (fileInput.files.length === 0) {
-        alert("Iltimos, rasm tanlang!");
-        return;
+      imageUpload.addEventListener('change', async () => {
+        if (!imageUpload.files || !imageUpload.files[0]) return;
+
+        // Rasmini o‘qib, <img> ga o‘rnatish
+        const file = imageUpload.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+          inputImage.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+
+        inputImage.onload = async () => {
+          // Canvas o‘lchamini rasmga moslash
+          overlay.width = inputImage.width;
+          overlay.height = inputImage.height;
+
+          // Ekrandagi eski natijalarni tozalash
+          resultsDiv.innerHTML = '';
+
+          // Yuzni aniqlash va landmarklarni olish
+          const detection = await faceapi
+            .detectSingleFace(inputImage, new faceapi.SsdMobilenetv1Options())
+            .withFaceLandmarks();
+
+          if (!detection) {
+            resultsDiv.innerHTML = `
+              <div class="result-card">
+                <h3>Yuz topilmadi, iltimos aniqlik yuqori rasm yuklang.</h3>
+              </div>`;
+            return;
+          }
+
+          // Landmarklarni chizish
+          const ctx = overlay.getContext('2d');
+          ctx.clearRect(0, 0, overlay.width, overlay.height);
+          faceapi.draw.drawFaceLandmarks(overlay, detection);
+
+          // Baholarni hisoblash
+          const box = detection.detection.box;
+          const landmarks = detection.landmarks;
+
+          // 1. Eyes (ko‘zlar)
+          const leftEyePts = landmarks.getLeftEye();
+          const rightEyePts = landmarks.getRightEye();
+          const leftEyeCenter = centerPoint(leftEyePts);
+          const rightEyeCenter = centerPoint(rightEyePts);
+          const eyeDistance = distance(leftEyeCenter, rightEyeCenter);
+          const eyeRatio = eyeDistance / box.width; // yuz kengligiga nisbati
+          const idealEyeRatio = 0.46; // taxminiy ideal nisbati
+          let eyeScore = Math.max(0, Math.min(100, (1 - Math.abs(eyeRatio - idealEyeRatio) / 0.2) * 100));
+
+          // 2. Nose (burun)
+          const nosePts = landmarks.getNose();
+          const noseLeft = nosePts[0];
+          const noseRight = nosePts[6];
+          const noseWidth = distance(noseLeft, noseRight);
+          const noseRatio = noseWidth / box.width;
+          const idealNoseRatio = 0.33;
+          let noseScore = Math.max(0, Math.min(100, (1 - Math.abs(noseRatio - idealNoseRatio) / 0.15) * 100));
+
+          // 3. Mouth (lab)
+          const mouthPts = landmarks.getMouth();
+          const mouthLeft = mouthPts[0];
+          const mouthRight = mouthPts[6];
+          const mouthWidth = distance(mouthLeft, mouthRight);
+          const mouthRatio = mouthWidth / box.width;
+          const idealMouthRatio = 0.5;
+          let mouthScore = Math.max(0, Math.min(100, (1 - Math.abs(mouthRatio - idealMouthRatio) / 0.2) * 100));
+
+          // Umumiy baho (o‘rtacha)
+          const overallScore = ((eyeScore + noseScore + mouthScore) / 3).toFixed(1);
+
+          // Natijalarni ekranga chiqarish
+          addResult('Ko‘zlar (Eyes)', eyeScore.toFixed(1));
+          addResult('Burun (Nose)', noseScore.toFixed(1));
+          addResult('Lab (Mouth)', mouthScore.toFixed(1));
+          const overallHTML = document.createElement('div');
+          overallHTML.className = 'overall';
+          overallHTML.innerText = `Umumiy Baho: ${overallScore}/100`;
+          resultsDiv.appendChild(overallHTML);
+        };
+      });
+
+      // Landmark punktlaridan markaz nuqtani olish
+      function centerPoint(points) {
+        const sum = points.reduce((acc, pt) => {
+          return { x: acc.x + pt.x, y: acc.y + pt.y };
+        }, { x: 0, y: 0 });
+        return { x: sum.x / points.length, y: sum.y / points.length };
       }
 
-      const file = fileInput.files[0];
-      const reader = new FileReader();
+      // Distansiya hisoblash
+      function distance(p1, p2) {
+        const dx = p1.x - p2.x;
+        const dy = p1.y - p2.y;
+        return Math.sqrt(dx * dx + dy * dy);
+      }
 
-      reader.onload = function(e) {
-        preview.src = e.target.result;
-        preview.hidden = false;
+      // Har bir qism uchun natija kartasini yaratish
+      function addResult(label, score) {
+        const card = document.createElement('div');
+        card.className = 'result-card';
 
-        const eyes = randomScore();
-        const nose = randomScore();
-        const mouth = randomScore();
-        const cheeks = randomScore();
-        const faceShape = randomScore();
+        const title = document.createElement('h3');
+        title.innerText = label;
 
-        document.getElementById('eyesScore').textContent = eyes;
-        document.getElementById('noseScore').textContent = nose;
-        document.getElementById('mouthScore').textContent = mouth;
-        document.getElementById('cheekScore').textContent = cheeks;
-        document.getElementById('faceShapeScore').textContent = faceShape;
+        const barWrapper = document.createElement('div');
+        barWrapper.className = 'score-bar';
 
-        const total = eyes + nose + mouth + cheeks + faceShape;
-        document.getElementById('totalScore').textContent = total;
+        const barFill = document.createElement('div');
+        barFill.className = 'score-fill';
+        barFill.style.width = `${score}%`;
 
-        ratings.hidden = false;
-      };
+        const scoreText = document.createElement('div');
+        scoreText.className = 'score-text';
+        scoreText.innerText = `${score}`;
 
-      reader.readAsDataURL(file);
+        barWrapper.appendChild(barFill);
+        card.appendChild(title);
+        card.appendChild(barWrapper);
+        card.appendChild(scoreText);
+        resultsDiv.appendChild(card);
+      }
     }
   </script>
 </body>
