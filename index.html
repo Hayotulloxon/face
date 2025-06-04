@@ -7,12 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
   <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
     body {
       min-height: 100vh;
       background: linear-gradient(135deg, #4B79A1, #283E51);
@@ -34,15 +29,8 @@
       align-items: center;
       padding: 2rem;
     }
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      color: #333;
-      text-align: center;
-    }
-    .upload-btn {
-      margin-bottom: 1.5rem;
-    }
+    h1 { font-size: 2.5rem; margin-bottom: 1rem; color: #333; text-align: center; }
+    .upload-btn { margin-bottom: 1.5rem; }
     .btn {
       background: linear-gradient(135deg, #FF8A00, #E52E71);
       color: #fff;
@@ -73,12 +61,13 @@
       box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
     #inputImage {
-      display: block;
+      display: none;
     }
     #overlay {
       position: absolute;
       top: 0;
       left: 0;
+      pointer-events: none;
     }
     .results {
       width: 100%;
@@ -132,9 +121,7 @@
       color: #E52E71;
     }
     @media (max-width: 600px) {
-      .score-bar {
-        width: 50%;
-      }
+      .score-bar { width: 50%; }
     }
   </style>
 </head>
@@ -152,10 +139,13 @@
     <div class="results" id="results"></div>
   </div>
   <script>
+    let modelsLoaded = false;
     Promise.all([
-      faceapi.nets.ssdMobilenetv1.loadFromUri('models/ssd_mobilenetv1'),
-      faceapi.nets.faceLandmark68Net.loadFromUri('models/face_landmark_68')
-    ]).then(() => console.log("Model yuklandi")).catch(err => console.error("Model yuklashda xatolik:", err));
+      faceapi.nets.ssdMobilenetv1.loadFromUri('models'),
+      faceapi.nets.faceLandmark68Net.loadFromUri('models')
+    ])
+      .then(() => { modelsLoaded = true; })
+      .catch(err => console.error("Model yuklashda xatolik:", err));
 
     const imageUpload = document.getElementById('imageUpload');
     const inputImage = document.getElementById('inputImage');
@@ -170,7 +160,11 @@
       const reader = new FileReader();
       reader.onload = () => {
         inputImage.src = reader.result;
+        inputImage.style.display = 'block';
         imageReady = true;
+        resultsDiv.innerHTML = '';
+        overlay.width = 0;
+        overlay.height = 0;
       };
       reader.readAsDataURL(file);
     });
@@ -181,12 +175,13 @@
     };
 
     analyzeBtn.addEventListener('click', async () => {
+      if (!modelsLoaded) return alert('Model hali to‘liq yuklanganicha yo‘q. Bir necha soniya kuting!');
       if (!imageReady) return alert('Iltimos, avval rasm tanlang.');
-      resultsDiv.innerHTML = '<div class="result-card"><h3>Yuklanmoqda...</h3></div>';
+
+      resultsDiv.innerHTML = '<div class="result-card"><h3>Tahlil qilinmoqda...</h3></div>';
 
       overlay.width = inputImage.width;
       overlay.height = inputImage.height;
-      resultsDiv.innerHTML = '';
 
       const detection = await faceapi
         .detectSingleFace(inputImage, new faceapi.SsdMobilenetv1Options())
@@ -194,6 +189,8 @@
 
       if (!detection) {
         resultsDiv.innerHTML = '<div class="result-card"><h3>Yuz topilmadi. Iltimos, aniq rasm tanlang.</h3></div>';
+        overlay.width = 0;
+        overlay.height = 0;
         return;
       }
 
@@ -222,6 +219,7 @@
 
       const overallScore = ((eyeScore + noseScore + mouthScore) / 3).toFixed(1);
 
+      resultsDiv.innerHTML = '';
       addResult('Ko‘zlar (Eyes)', eyeScore.toFixed(1));
       addResult('Burun (Nose)', noseScore.toFixed(1));
       addResult('Lab (Mouth)', mouthScore.toFixed(1));
