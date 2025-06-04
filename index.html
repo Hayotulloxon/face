@@ -118,9 +118,10 @@
     };
   }
 
+  // Tez yuz aniqlash uchun ssdMobilenetv1 va landmark68TinyNet ishlatamiz
   async function loadModels() {
-    await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/weights');
-    await faceapi.nets.faceLandmark68TinyNet.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/weights');
+    await faceapi.nets.ssdMobilenetv1.loadFromUri('models');
+    await faceapi.nets.faceLandmark68TinyNet.loadFromUri('models');
   }
   loadModels();
 
@@ -138,10 +139,12 @@
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0);
-      // Yuz aniqlash
+
+      // Yuz aniqlash (ssdMobilenetv1 + landmark68TinyNet)
       const detections = await faceapi
-        .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions())
+        .detectSingleFace(canvas, new faceapi.SsdMobilenetv1Options())
         .withFaceLandmarks(true);
+
       document.getElementById('loading').style.display = 'none';
 
       if (!detections) {
