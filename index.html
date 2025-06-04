@@ -5,127 +5,94 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Face Analyzer</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
-  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
     body {
       min-height: 100vh;
-      background: #283E51;
+      background: linear-gradient(135deg, #4B79A1, #283E51);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
     }
     .container {
-      background: #ffffff;
-      color: #333;
-      width: 90%;
-      max-width: 800px;
-      border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 1.5rem;
+      background: #fff; color: #333; width: 90%; max-width: 900px; border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3); overflow: hidden;
+      display: flex; flex-direction: column; align-items: center; padding: 2rem;
     }
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      color: #333;
-      text-align: center;
-    }
+    h1 { font-size: 2.5rem; margin-bottom: 1rem; color: #333; text-align: center;}
+    .upload-btn {margin-bottom: 1.5rem;}
     .btn {
-      background: #E52E71;
-      color: #fff;
-      padding: 0.6rem 1.2rem;
-      font-size: 1rem;
-      border: none;
-      border-radius: 30px;
-      cursor: pointer;
-      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #FF8A00, #E52E71);
+      color: #fff; padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 500;
+      border: none; border-radius: 50px; cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn:hover {transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2);}
+    #preview-wrapper {
+      position: relative; width: 100%; max-width: 600px; margin-bottom: 1.5rem;
+      display: flex; justify-content: center; align-items: center;
+      background: #eee; min-height: 200px; border-radius: 15px;
     }
     #inputImage, #overlay {
-      max-width: 100%;
-      border-radius: 10px;
+      max-width: 100%; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      display: block;
     }
-    #preview-wrapper {
-      position: relative;
+    #inputImage {
       width: 100%;
-      max-width: 500px;
-      margin-bottom: 1rem;
-      display: flex;
-      justify-content: center;
+      height: auto;
+      background: #ddd;
+      object-fit: contain;
     }
-    .results {
-      width: 100%;
+    #overlay {
+      position: absolute; top: 0; left: 0; pointer-events: none;
     }
+    .results {width: 100%; margin-top: 1rem;}
     .result-card {
-      background: #f0f0f0;
-      border-radius: 10px;
-      padding: 0.8rem 1rem;
-      margin-bottom: 0.8rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      background: #fafafa; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 1rem 1.5rem; margin-bottom: 1rem; display: flex;
+      justify-content: space-between; align-items: center;
     }
-    .result-card h3 {
-      font-size: 1rem;
-      color: #333;
-    }
+    .result-card h3 {font-size: 1.125rem; font-weight: 500; color: #444;}
     .score-bar {
-      position: relative;
-      width: 50%;
-      height: 10px;
-      background: #ccc;
-      border-radius: 5px;
-      margin-left: 1rem;
+      position: relative; width: 60%; height: 12px; background: #e0e0e0;
+      border-radius: 6px; overflow: hidden; margin-left: 1rem;
     }
     .score-fill {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      background: #E52E71;
-      border-radius: 5px;
+      position: absolute; top: 0; left: 0; height: 100%;
+      background: linear-gradient(135deg, #FF8A00, #E52E71);
+      border-radius: 6px; transition: width 0.6s ease;
     }
     .score-text {
-      font-weight: 600;
-      margin-left: 1rem;
-      width: 40px;
-      text-align: right;
-      color: #333;
+      font-weight: 600; margin-left: 1rem; width: 50px; text-align: right; color: #444;
     }
     .overall {
-      font-size: 1.25rem;
-      font-weight: bold;
-      text-align: center;
-      margin-top: 1rem;
-      color: #E52E71;
+      font-size: 1.5rem; font-weight: 700; text-align: center;
+      margin-top: 1rem; color: #E52E71;
     }
+    @media (max-width: 600px) {.score-bar {width: 50%;}}
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Face Analyzer</h1>
-    <input type="file" id="imageUpload" accept="image/*" class="btn" />
+    <div class="upload-btn">
+      <input type="file" id="imageUpload" accept="image/*" class="btn" />
+    </div>
     <div id="preview-wrapper">
-      <img id="inputImage" src="" alt="Uploaded Face" />
+      <img id="inputImage" src="" alt="Yuklangan rasm" />
       <canvas id="overlay"></canvas>
     </div>
     <button id="analyzeBtn" class="btn">Tahlil qilish</button>
     <div class="results" id="results"></div>
   </div>
   <script>
+    let modelsLoaded = false;
     Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri('models'),
+      faceapi.nets.ssdMobilenetv1.loadFromUri('models'),
       faceapi.nets.faceLandmark68Net.loadFromUri('models')
-    ]).then(() => console.log("Model yuklandi"));
+    ]).then(() => { modelsLoaded = true; });
 
     const imageUpload = document.getElementById('imageUpload');
     const inputImage = document.getElementById('inputImage');
@@ -134,37 +101,53 @@
     const analyzeBtn = document.getElementById('analyzeBtn');
     let imageReady = false;
 
+    // Rasm tanlanganda rasm preview va canvas tozalanadi
     imageUpload.addEventListener('change', () => {
+      if (!imageUpload.files || !imageUpload.files[0]) return;
       const file = imageUpload.files[0];
-      if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
         inputImage.src = reader.result;
+        inputImage.style.display = 'block';
+        resultsDiv.innerHTML = '';
+        overlay.width = 0; overlay.height = 0;
         imageReady = true;
       };
       reader.readAsDataURL(file);
     });
 
-    inputImage.onload = () => {
-      overlay.width = inputImage.width;
-      overlay.height = inputImage.height;
+    // Rasm yuklanganda canvas o'lchami to'g'ri bo'ladi
+    inputImage.onload = function() {
+      overlay.width = inputImage.naturalWidth;
+      overlay.height = inputImage.naturalHeight;
+      overlay.style.width = inputImage.width + 'px';
+      overlay.style.height = inputImage.height + 'px';
+      // canvas preview tagiga joylashadi
+      inputImage.style.display = 'block';
     };
 
     analyzeBtn.addEventListener('click', async () => {
-      if (!imageReady) return alert('Iltimos, avval rasm tanlang.');
-      resultsDiv.innerHTML = '';
-      overlay.width = inputImage.width;
-      overlay.height = inputImage.height;
+      if (!modelsLoaded) return alert('Model hali yuklanmadi. Yana bir necha soniya kuting!');
+      if (!imageReady || !inputImage.src) return alert('Iltimos, avval rasm tanlang.');
+
+      resultsDiv.innerHTML = '<div class="result-card"><h3>Tahlil qilinmoqda...</h3></div>';
+      overlay.width = inputImage.naturalWidth;
+      overlay.height = inputImage.naturalHeight;
+      overlay.style.width = inputImage.width + 'px';
+      overlay.style.height = inputImage.height + 'px';
 
       const detection = await faceapi
-        .detectSingleFace(inputImage, new faceapi.TinyFaceDetectorOptions())
+        .detectSingleFace(inputImage, new faceapi.SsdMobilenetv1Options())
         .withFaceLandmarks();
 
       if (!detection) {
-        resultsDiv.innerHTML = '<div class="result-card"><h3>Yuz topilmadi.</h3></div>';
+        resultsDiv.innerHTML = '<div class="result-card"><h3>Bu rasmda yuz yo‘q! Iltimos, aniq yuz rasmi tanlang.</h3></div>';
+        const ctx = overlay.getContext('2d');
+        ctx.clearRect(0, 0, overlay.width, overlay.height);
         return;
       }
 
+      // Chizish
       const ctx = overlay.getContext('2d');
       ctx.clearRect(0, 0, overlay.width, overlay.height);
       faceapi.draw.drawFaceLandmarks(overlay, detection);
@@ -172,63 +155,65 @@
       const box = detection.detection.box;
       const landmarks = detection.landmarks;
 
-      const eyeScore = calcScore(landmarks.getLeftEye(), landmarks.getRightEye(), box.width, 0.46);
+      // Ko‘zlar
+      const leftEyeCenter = centerPoint(landmarks.getLeftEye());
+      const rightEyeCenter = centerPoint(landmarks.getRightEye());
+      const eyeDistance = distance(leftEyeCenter, rightEyeCenter);
+      const eyeRatio = eyeDistance / box.width;
+      const eyeScore = Math.round(100 - Math.abs((eyeRatio - 0.46) * 200)); // 0.46 ideal
+
+      // Burun
       const nosePts = landmarks.getNose();
-      const noseScore = calcScore([nosePts[0]], [nosePts[6]], box.width, 0.33);
+      const noseWidth = distance(nosePts[0], nosePts[6]);
+      const noseRatio = noseWidth / box.width;
+      const noseScore = Math.round(100 - Math.abs((noseRatio - 0.33) * 200)); // 0.33 ideal
+
+      // Lab
       const mouthPts = landmarks.getMouth();
-      const mouthScore = calcScore([mouthPts[0]], [mouthPts[6]], box.width, 0.5);
-      const overallScore = ((eyeScore + noseScore + mouthScore) / 3).toFixed(1);
+      const mouthWidth = distance(mouthPts[0], mouthPts[6]);
+      const mouthRatio = mouthWidth / box.width;
+      const mouthScore = Math.round(100 - Math.abs((mouthRatio - 0.5) * 200)); // 0.5 ideal
 
-      addResult('Ko‘zlar', eyeScore.toFixed(1));
-      addResult('Burun', noseScore.toFixed(1));
-      addResult('Lab', mouthScore.toFixed(1));
+      // 0-100 oralig‘ida cheklash
+      const safeScore = s => Math.max(0, Math.min(100, s));
+      const eScore = safeScore(eyeScore);
+      const nScore = safeScore(noseScore);
+      const mScore = safeScore(mouthScore);
 
+      const overallScore = ((eScore + nScore + mScore) / 3).toFixed(1);
+
+      resultsDiv.innerHTML = '';
+      addResult('Ko‘zlar', eScore);
+      addResult('Burun', nScore);
+      addResult('Lab', mScore);
       const overallHTML = document.createElement('div');
       overallHTML.className = 'overall';
-      overallHTML.innerText = `Umumiy Baho: ${overallScore}/100`;
+      overallHTML.innerText = `Umumiy natija: ${overallScore} / 100`;
       resultsDiv.appendChild(overallHTML);
-
-      if (parseFloat(overallScore) >= 90) {
-        const badge = document.createElement('div');
-        badge.className = 'overall';
-        badge.innerText = '🏆 Siz juda jozibalisiz!';
-        resultsDiv.appendChild(badge);
-      }
     });
 
-    function calcScore(p1, p2, boxWidth, idealRatio) {
-      const d = distance(centerPoint(p1), centerPoint(p2));
-      const ratio = d / boxWidth;
-      return Math.max(0, Math.min(100, (1 - Math.abs(ratio - idealRatio) / 0.2) * 100));
+    function centerPoint(points) {
+      const sum = points.reduce((acc, pt) => ({ x: acc.x + pt.x, y: acc.y + pt.y }), { x: 0, y: 0 });
+      return { x: sum.x / points.length, y: sum.y / points.length };
     }
 
-    function centerPoint(pts) {
-      const sum = pts.reduce((acc, pt) => ({ x: acc.x + pt.x, y: acc.y + pt.y }), { x: 0, y: 0 });
-      return { x: sum.x / pts.length, y: sum.y / pts.length };
-    }
-
-    function distance(a, b) {
-      return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+    function distance(p1, p2) {
+      return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
     }
 
     function addResult(label, score) {
       const card = document.createElement('div');
       card.className = 'result-card';
-
       const title = document.createElement('h3');
       title.innerText = label;
-
       const barWrapper = document.createElement('div');
       barWrapper.className = 'score-bar';
-
       const barFill = document.createElement('div');
       barFill.className = 'score-fill';
       barFill.style.width = `${score}%`;
-
       const scoreText = document.createElement('div');
       scoreText.className = 'score-text';
       scoreText.innerText = `${score}`;
-
       barWrapper.appendChild(barFill);
       card.appendChild(title);
       card.appendChild(barWrapper);
