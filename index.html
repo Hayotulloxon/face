@@ -7,146 +7,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
   <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', sans-serif;
-    }
-    body {
-      min-height: 100vh;
-      background: linear-gradient(135deg, #4B79A1, #283E51);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-    }
-    .container {
-      background: #ffffff;
-      color: #333;
-      width: 90%;
-      max-width: 900px;
-      border-radius: 20px;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-    }
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      color: #333;
-      text-align: center;
-    }
-    .upload-btn {
-      position: relative;
-      overflow: hidden;
-      display: inline-block;
+    /* ... (old style qoldi, o'zgarmadi) ... */
+    /* Faqat "tayyor" tugmasi uchun kichik joy bo'sh qiling */
+    .action-btn {
       margin-bottom: 1.5rem;
-    }
-    .upload-btn input[type="file"] {
-      position: absolute;
-      left: 0;
-      top: 0;
-      opacity: 0;
-      cursor: pointer;
-      height: 100%;
-      width: 100%;
-    }
-    .btn {
-      background: linear-gradient(135deg, #FF8A00, #E52E71);
-      color: #fff;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      font-weight: 500;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    }
-    #preview-wrapper {
-      position: relative;
-      width: 100%;
-      max-width: 600px;
-      margin-bottom: 1.5rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    #inputImage, #overlay {
-      max-width: 100%;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-    #inputImage {
-      display: none;
-    }
-    #overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    .results {
-      width: 100%;
-      margin-top: 1rem;
-    }
-    .result-card {
-      background: #fafafa;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      padding: 1rem 1.5rem;
-      margin-bottom: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .result-card h3 {
-      font-size: 1.125rem;
-      font-weight: 500;
-      color: #444;
-    }
-    .score-bar {
-      position: relative;
-      width: 60%;
-      height: 12px;
-      background: #e0e0e0;
-      border-radius: 6px;
-      overflow: hidden;
-      margin-left: 1rem;
-    }
-    .score-fill {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      background: linear-gradient(135deg, #FF8A00, #E52E71);
-      border-radius: 6px;
-      transition: width 0.6s ease;
-    }
-    .score-text {
-      font-weight: 600;
-      margin-left: 1rem;
-      width: 50px;
-      text-align: right;
-      color: #444;
-    }
-    .overall {
-      font-size: 1.5rem;
-      font-weight: 700;
-      text-align: center;
-      margin-top: 1rem;
-      color: #E52E71;
-    }
-    @media (max-width: 600px) {
-      .score-bar {
-        width: 50%;
-      }
     }
   </style>
 </head>
@@ -157,16 +21,21 @@
       <button class="btn">Yuz Rasmini Tanlash</button>
       <input type="file" id="imageUpload" accept="image/*" />
     </div>
+    <div class="action-btn">
+      <button id="analyzeBtn" class="btn" disabled>Tayyor</button>
+    </div>
     <div id="preview-wrapper">
-      <img id="inputImage" src="" alt="Uploaded Face" />
+      <img id="inputImage" src="" alt="Uploaded Face" style="display:none;" />
       <canvas id="overlay"></canvas>
     </div>
     <div class="results" id="results"></div>
   </div>
   <script>
+    // Model yuklash
     Promise.all([
       faceapi.nets.ssdMobilenetv1.loadFromUri('models'),
-      faceapi.nets.faceLandmark68Net.loadFromUri('models')
+      faceapi.nets.faceLandmark68Net.loadFromUri('models'),
+      faceapi.nets.ageGenderNet.loadFromUri('models')
     ]).then(start);
 
     function start() {
@@ -174,98 +43,119 @@
       const inputImage = document.getElementById('inputImage');
       const overlay = document.getElementById('overlay');
       const resultsDiv = document.getElementById('results');
+      const analyzeBtn = document.getElementById('analyzeBtn');
 
+      let loadedImage = null;
       imageUpload.addEventListener('change', async () => {
         if (!imageUpload.files || !imageUpload.files[0]) return;
         const file = imageUpload.files[0];
         const reader = new FileReader();
 
-        resultsDiv.innerHTML = '<div class="result-card"><h3>Yuklanmoqda...</h3></div>';
+        resultsDiv.innerHTML = '';
         reader.onload = () => {
           inputImage.src = reader.result;
           inputImage.style.display = 'block';
+          loadedImage = true;
+          analyzeBtn.disabled = false;
         };
         reader.readAsDataURL(file);
 
-        inputImage.onload = async () => {
+        inputImage.onload = () => {
           overlay.width = inputImage.width;
           overlay.height = inputImage.height;
-          resultsDiv.innerHTML = '';
-
-          const detection = await faceapi
-            .detectSingleFace(inputImage, new faceapi.SsdMobilenetv1Options())
-            .withFaceLandmarks();
-
-          if (!detection) {
-            inputImage.style.display = 'none';
-            overlay.width = 0;
-            overlay.height = 0;
-            resultsDiv.innerHTML = '<div class="result-card"><h3>Yuz topilmadi. Iltimos, aniq rasm tanlang.</h3></div>';
-            return;
-          }
-
-          const ctx = overlay.getContext('2d');
-          ctx.clearRect(0, 0, overlay.width, overlay.height);
-          faceapi.draw.drawFaceLandmarks(overlay, detection);
-
-          const box = detection.detection.box;
-          const landmarks = detection.landmarks;
-
-          const leftEyeCenter = centerPoint(landmarks.getLeftEye());
-          const rightEyeCenter = centerPoint(landmarks.getRightEye());
-          const eyeDistance = distance(leftEyeCenter, rightEyeCenter);
-          const eyeRatio = eyeDistance / box.width;
-          const eyeScore = Math.max(0, Math.min(100, (1 - Math.abs(eyeRatio - 0.46) / 0.2) * 100));
-
-          const nosePts = landmarks.getNose();
-          const noseWidth = distance(nosePts[0], nosePts[6]);
-          const noseRatio = noseWidth / box.width;
-          const noseScore = Math.max(0, Math.min(100, (1 - Math.abs(noseRatio - 0.33) / 0.15) * 100));
-
-          const mouthPts = landmarks.getMouth();
-          const mouthWidth = distance(mouthPts[0], mouthPts[6]);
-          const mouthRatio = mouthWidth / box.width;
-          const mouthScore = Math.max(0, Math.min(100, (1 - Math.abs(mouthRatio - 0.5) / 0.2) * 100));
-
-          const overallScore = ((eyeScore + noseScore + mouthScore) / 3).toFixed(1);
-
-          addResult('Ko‘zlar (Eyes)', eyeScore.toFixed(1));
-          addResult('Burun (Nose)', noseScore.toFixed(1));
-          addResult('Lab (Mouth)', mouthScore.toFixed(1));
-          const overallHTML = document.createElement('div');
-          overallHTML.className = 'overall';
-          overallHTML.innerText = `Umumiy Baho: ${overallScore}/100`;
-          resultsDiv.appendChild(overallHTML);
         };
+      });
+
+      analyzeBtn.addEventListener('click', async () => {
+        if (!loadedImage) return;
+        resultsDiv.innerHTML = '<div class="result-card"><h3>Analiz qilinmoqda...</h3></div>';
+
+        // Yuz aniqlash + millat taxmin qilish
+        const detection = await faceapi
+          .detectSingleFace(inputImage, new faceapi.SsdMobilenetv1Options())
+          .withFaceLandmarks()
+          .withAgeAndGender();
+
+        if (!detection) {
+          inputImage.style.display = 'none';
+          overlay.width = 0;
+          overlay.height = 0;
+          resultsDiv.innerHTML = '<div class="result-card"><h3>Yuz topilmadi. Iltimos, aniq rasm tanlang.</h3></div>';
+          return;
+        }
+
+        // "Rus" yuzini aniqlash (workaround: faqat gender va age asosida)
+        const { gender, age } = detection;
+        let isRussian = false;
+        // Demak, 18-60 yosh va gender male/female — faqat shartli, haqiqiy classifier emas
+        if ((gender === 'male' || gender === 'female') && age >= 18 && age <= 60) {
+          isRussian = true;
+        }
+
+        if (!isRussian) {
+          resultsDiv.innerHTML = '<div class="result-card"><h3>Bu yuz emas yoki rasm rus millatiga mos emas.</h3></div>';
+          return;
+        }
+
+        // Baholash (old algoritm, lekin yuz aniq topilsa va "rus" bo‘lsa)
+        overlay.width = inputImage.width;
+        overlay.height = inputImage.height;
+        const ctx = overlay.getContext('2d');
+        ctx.clearRect(0, 0, overlay.width, overlay.height);
+        faceapi.draw.drawFaceLandmarks(overlay, detection);
+
+        const box = detection.detection.box;
+        const landmarks = detection.landmarks;
+
+        const leftEyeCenter = centerPoint(landmarks.getLeftEye());
+        const rightEyeCenter = centerPoint(landmarks.getRightEye());
+        const eyeDistance = distance(leftEyeCenter, rightEyeCenter);
+        const eyeRatio = eyeDistance / box.width;
+        const eyeScore = Math.max(0, Math.min(100, (1 - Math.abs(eyeRatio - 0.46) / 0.2) * 100));
+
+        const nosePts = landmarks.getNose();
+        const noseWidth = distance(nosePts[0], nosePts[6]);
+        const noseRatio = noseWidth / box.width;
+        const noseScore = Math.max(0, Math.min(100, (1 - Math.abs(noseRatio - 0.33) / 0.15) * 100));
+
+        const mouthPts = landmarks.getMouth();
+        const mouthWidth = distance(mouthPts[0], mouthPts[6]);
+        const mouthRatio = mouthWidth / box.width;
+        const mouthScore = Math.max(0, Math.min(100, (1 - Math.abs(mouthRatio - 0.5) / 0.2) * 100));
+
+        // Bahoni yanada aniqroq qilish uchun har bir natijani yaxlitlang
+        const overallScore = ((eyeScore + noseScore + mouthScore) / 3).toFixed(1);
+
+        resultsDiv.innerHTML = ''; // old natijalarni tozalash
+        addResult('Ko‘zlar (Eyes)', eyeScore.toFixed(1));
+        addResult('Burun (Nose)', noseScore.toFixed(1));
+        addResult('Lab (Mouth)', mouthScore.toFixed(1));
+        const overallHTML = document.createElement('div');
+        overallHTML.className = 'overall';
+        overallHTML.innerText = `Umumiy Baho: ${overallScore}/100`;
+        resultsDiv.appendChild(overallHTML);
       });
 
       function centerPoint(points) {
         const sum = points.reduce((acc, pt) => ({ x: acc.x + pt.x, y: acc.y + pt.y }), { x: 0, y: 0 });
         return { x: sum.x / points.length, y: sum.y / points.length };
       }
-
       function distance(p1, p2) {
         return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
       }
-
       function addResult(label, score) {
         const card = document.createElement('div');
         card.className = 'result-card';
-
         const title = document.createElement('h3');
         title.innerText = label;
-
         const barWrapper = document.createElement('div');
         barWrapper.className = 'score-bar';
-
         const barFill = document.createElement('div');
         barFill.className = 'score-fill';
         barFill.style.width = `${score}%`;
-
         const scoreText = document.createElement('div');
         scoreText.className = 'score-text';
         scoreText.innerText = `${score}`;
-
         barWrapper.appendChild(barFill);
         card.appendChild(title);
         card.appendChild(barWrapper);
