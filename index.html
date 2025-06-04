@@ -153,9 +153,9 @@
   </div>
   <script>
     Promise.all([
-      faceapi.nets.ssdMobilenetv1.loadFromUri('models'),
-      faceapi.nets.faceLandmark68Net.loadFromUri('models')
-    ]);
+      faceapi.nets.ssdMobilenetv1.loadFromUri('models/ssd_mobilenetv1'),
+      faceapi.nets.faceLandmark68Net.loadFromUri('models/face_landmark_68')
+    ]).then(() => console.log("Model yuklandi")).catch(err => console.error("Model yuklashda xatolik:", err));
 
     const imageUpload = document.getElementById('imageUpload');
     const inputImage = document.getElementById('inputImage');
@@ -175,57 +175,60 @@
       reader.readAsDataURL(file);
     });
 
+    inputImage.onload = () => {
+      overlay.width = inputImage.width;
+      overlay.height = inputImage.height;
+    };
+
     analyzeBtn.addEventListener('click', async () => {
       if (!imageReady) return alert('Iltimos, avval rasm tanlang.');
       resultsDiv.innerHTML = '<div class="result-card"><h3>Yuklanmoqda...</h3></div>';
 
-      inputImage.onload = async () => {
-        overlay.width = inputImage.width;
-        overlay.height = inputImage.height;
-        resultsDiv.innerHTML = '';
+      overlay.width = inputImage.width;
+      overlay.height = inputImage.height;
+      resultsDiv.innerHTML = '';
 
-        const detection = await faceapi
-          .detectSingleFace(inputImage, new faceapi.SsdMobilenetv1Options())
-          .withFaceLandmarks();
+      const detection = await faceapi
+        .detectSingleFace(inputImage, new faceapi.SsdMobilenetv1Options())
+        .withFaceLandmarks();
 
-        if (!detection) {
-          resultsDiv.innerHTML = '<div class="result-card"><h3>Yuz topilmadi. Iltimos, aniq rasm tanlang.</h3></div>';
-          return;
-        }
+      if (!detection) {
+        resultsDiv.innerHTML = '<div class="result-card"><h3>Yuz topilmadi. Iltimos, aniq rasm tanlang.</h3></div>';
+        return;
+      }
 
-        const ctx = overlay.getContext('2d');
-        ctx.clearRect(0, 0, overlay.width, overlay.height);
-        faceapi.draw.drawFaceLandmarks(overlay, detection);
+      const ctx = overlay.getContext('2d');
+      ctx.clearRect(0, 0, overlay.width, overlay.height);
+      faceapi.draw.drawFaceLandmarks(overlay, detection);
 
-        const box = detection.detection.box;
-        const landmarks = detection.landmarks;
+      const box = detection.detection.box;
+      const landmarks = detection.landmarks;
 
-        const leftEyeCenter = centerPoint(landmarks.getLeftEye());
-        const rightEyeCenter = centerPoint(landmarks.getRightEye());
-        const eyeDistance = distance(leftEyeCenter, rightEyeCenter);
-        const eyeRatio = eyeDistance / box.width;
-        const eyeScore = Math.max(0, Math.min(100, (1 - Math.abs(eyeRatio - 0.46) / 0.2) * 100));
+      const leftEyeCenter = centerPoint(landmarks.getLeftEye());
+      const rightEyeCenter = centerPoint(landmarks.getRightEye());
+      const eyeDistance = distance(leftEyeCenter, rightEyeCenter);
+      const eyeRatio = eyeDistance / box.width;
+      const eyeScore = Math.max(0, Math.min(100, (1 - Math.abs(eyeRatio - 0.46) / 0.2) * 100));
 
-        const nosePts = landmarks.getNose();
-        const noseWidth = distance(nosePts[0], nosePts[6]);
-        const noseRatio = noseWidth / box.width;
-        const noseScore = Math.max(0, Math.min(100, (1 - Math.abs(noseRatio - 0.33) / 0.15) * 100));
+      const nosePts = landmarks.getNose();
+      const noseWidth = distance(nosePts[0], nosePts[6]);
+      const noseRatio = noseWidth / box.width;
+      const noseScore = Math.max(0, Math.min(100, (1 - Math.abs(noseRatio - 0.33) / 0.15) * 100));
 
-        const mouthPts = landmarks.getMouth();
-        const mouthWidth = distance(mouthPts[0], mouthPts[6]);
-        const mouthRatio = mouthWidth / box.width;
-        const mouthScore = Math.max(0, Math.min(100, (1 - Math.abs(mouthRatio - 0.5) / 0.2) * 100));
+      const mouthPts = landmarks.getMouth();
+      const mouthWidth = distance(mouthPts[0], mouthPts[6]);
+      const mouthRatio = mouthWidth / box.width;
+      const mouthScore = Math.max(0, Math.min(100, (1 - Math.abs(mouthRatio - 0.5) / 0.2) * 100));
 
-        const overallScore = ((eyeScore + noseScore + mouthScore) / 3).toFixed(1);
+      const overallScore = ((eyeScore + noseScore + mouthScore) / 3).toFixed(1);
 
-        addResult('Ko‘zlar (Eyes)', eyeScore.toFixed(1));
-        addResult('Burun (Nose)', noseScore.toFixed(1));
-        addResult('Lab (Mouth)', mouthScore.toFixed(1));
-        const overallHTML = document.createElement('div');
-        overallHTML.className = 'overall';
-        overallHTML.innerText = `Umumiy Baho: ${overallScore}/100`;
-        resultsDiv.appendChild(overallHTML);
-      };
+      addResult('Ko‘zlar (Eyes)', eyeScore.toFixed(1));
+      addResult('Burun (Nose)', noseScore.toFixed(1));
+      addResult('Lab (Mouth)', mouthScore.toFixed(1));
+      const overallHTML = document.createElement('div');
+      overallHTML.className = 'overall';
+      overallHTML.innerText = `Umumiy Baho: ${overallScore}/100`;
+      resultsDiv.appendChild(overallHTML);
     });
 
     function centerPoint(points) {
