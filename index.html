@@ -54,7 +54,7 @@
   <div class="container">
     <div class="wow-card animate__animated animate__fadeInDown">
       <div class="wow-brand text-center">WOW Yuz Chiroyliligi O'lchagich 😍</div>
-      <form id="faceForm" class="mb-4">
+      <form id="faceForm" class="mb-4" autocomplete="off">
         <input type="file" id="faceInput" accept="image/*" class="form-control mb-3" required>
         <button type="submit" class="btn btn-warning btn-lg w-100">Yuzni Baholash</button>
       </form>
@@ -69,7 +69,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script>
-    // Ko'rsatkichlarni baholash uchun (demo uchun hammasi 100, FaceMesh bilan haqiqiy baholash qilinadi)
+    // Demo uchun baholash (FaceMesh bilan haqiqiy baholash qilish mumkin, hozircha 100)
     function rateFace(box) {
       return {
         eyeScore: 100,
@@ -98,7 +98,8 @@
     let canvas = document.createElement('canvas');
     let ctx = canvas.getContext('2d');
 
-    form.onsubmit = function(e) {
+    // Formani submit qilishni to'liq to'g'ri ushlab, sayfa yangilanishini to'xtatamiz
+    form.addEventListener('submit', function(e) {
       e.preventDefault();
       resultDiv.innerHTML = '';
       loading.style.display = '';
@@ -112,7 +113,7 @@
         faceDetection.send({image: img});
       };
       img.src = URL.createObjectURL(file);
-    };
+    });
 
     faceDetection.onResults((results) => {
       loading.style.display = 'none';
