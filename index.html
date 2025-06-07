@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avtomatik Yuz Baholash</title>
+    <title>Aqlli Yuz Baholash Dasturi</title>
     <style>
         :root {
-            --primary: #6a11cb;
-            --secondary: #2575fc;
+            --primary: #8e44ad;
+            --secondary: #3498db;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f39c12;
             --dark: #2c3e50;
-            --light: #f8f9fa;
-            --accent: #fbc531;
-            --success: #4cd137;
+            --light: #ecf0f1;
         }
         
         * {
@@ -22,7 +23,7 @@
         }
         
         body {
-            background: linear-gradient(to right, #f5f7fa, #e4e8f0);
+            background: linear-gradient(135deg, var(--light), #dfe6e9);
             min-height: 100vh;
             padding: 20px;
             color: var(--dark);
@@ -75,20 +76,43 @@
             padding: 40px;
             cursor: pointer;
             transition: all 0.3s;
-            background-color: rgba(37, 117, 252, 0.05);
+            background-color: rgba(52, 152, 219, 0.05);
             margin-bottom: 20px;
             position: relative;
         }
         
+        .upload-area.error {
+            border-color: var(--danger);
+            background-color: rgba(231, 76, 60, 0.05);
+        }
+        
+        .upload-area.success {
+            border-color: var(--success);
+            background-color: rgba(46, 204, 113, 0.05);
+        }
+        
         .upload-area:hover {
-            background-color: rgba(37, 117, 252, 0.1);
             transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
         .upload-area i {
             font-size: 50px;
-            color: var(--secondary);
             margin-bottom: 15px;
+        }
+        
+        .upload-area .default-icon {
+            color: var(--secondary);
+        }
+        
+        .upload-area .success-icon {
+            color: var(--success);
+            display: none;
+        }
+        
+        .upload-area .error-icon {
+            color: var(--danger);
+            display: none;
         }
         
         .upload-area p {
@@ -111,7 +135,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -123,7 +147,7 @@
         .spinner {
             width: 50px;
             height: 50px;
-            border: 5px solid rgba(37, 117, 252, 0.2);
+            border: 5px solid rgba(52, 152, 219, 0.2);
             border-radius: 50%;
             border-top-color: var(--secondary);
             animation: spin 1s ease-in-out infinite;
@@ -138,10 +162,21 @@
             width: 100%;
             text-align: center;
             padding: 30px;
-            background: linear-gradient(to right, rgba(106, 17, 203, 0.05), rgba(37, 117, 252, 0.05));
+            background: linear-gradient(to right, rgba(142, 68, 173, 0.05), rgba(52, 152, 219, 0.05));
             border-radius: 15px;
             margin-top: 20px;
             display: none;
+        }
+        
+        .error-section {
+            width: 100%;
+            text-align: center;
+            padding: 30px;
+            background-color: rgba(231, 76, 60, 0.05);
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+            border: 1px solid var(--danger);
         }
         
         .overall-rating {
@@ -245,25 +280,24 @@
             transition: width 1s ease;
         }
         
-        .face-landmarks {
+        .age-display {
+            font-size: 1.5rem;
+            margin: 15px 0;
+            color: var(--dark);
+        }
+        
+        .face-box {
+            position: absolute;
+            border: 3px solid var(--success);
+            border-radius: 5px;
+            background-color: rgba(46, 204, 113, 0.2);
+            display: none;
+        }
+        
+        .face-container {
             position: relative;
             display: inline-block;
             margin: 20px 0;
-        }
-        
-        .face-landmarks img {
-            max-width: 100%;
-            border-radius: 10px;
-            display: block;
-        }
-        
-        .landmark-point {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background-color: var(--accent);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
         }
         
         @media (max-width: 768px) {
@@ -285,8 +319,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>Avtomatik Yuz Baholash</h1>
-            <p>Yuzingizni rasmini yuklang va AI tizimimiz uni avtomatik baholaydi</p>
+            <h1>Aqlli Yuz Baholash Dasturi</h1>
+            <p>Yuzingizni rasmini yuklang, tizim avtomatik tanib, baholaydi va yoshini aniqlaydi</p>
         </header>
         
         <div class="app-body">
@@ -296,15 +330,24 @@
                         <div class="spinner"></div>
                         <p>Yuz tahlili qilinmoqda...</p>
                     </div>
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Yuz rasmingizni shu yerga tortib keling yoki <span style="color: var(--accent); font-weight: bold;">tanlang</span></p>
+                    <i class="fas fa-cloud-upload-alt default-icon"></i>
+                    <i class="fas fa-check-circle success-icon"></i>
+                    <i class="fas fa-exclamation-circle error-icon"></i>
+                    <p id="uploadText">Yuz rasmingizni shu yerga tortib keling yoki <span style="color: var(--warning); font-weight: bold;">tanlang</span></p>
                     <input type="file" id="imageInput" accept="image/*" style="display: none;">
                 </div>
-                <img id="imagePreview" alt="Yuz rasmi">
                 
-                <div class="face-landmarks" id="faceLandmarks" style="display: none;">
-                    <img id="landmarkedImage" src="" alt="Yuz nuqtalari">
+                <div class="face-container">
+                    <img id="imagePreview" alt="Yuz rasmi">
+                    <div class="face-box" id="faceBox"></div>
                 </div>
+            </div>
+            
+            <div class="error-section" id="errorSection">
+                <i class="fas fa-exclamation-triangle" style="font-size: 50px; color: var(--danger); margin-bottom: 15px;"></i>
+                <h2 style="color: var(--danger); margin-bottom: 10px;">Yuz aniqlanmadi!</h2>
+                <p style="font-size: 1.1rem;">Yuklangan rasmdan yuzni aniqlab bo'lmadi. Iltimos, aniq yuz ko'rinayotgan rasm yuklang.</p>
+                <button id="tryAgainBtn">Qayta urinish</button>
             </div>
             
             <div class="result-section" id="resultSection">
@@ -312,6 +355,7 @@
                 <p style="color: var(--dark); opacity: 0.8;">AI tizim tomonidan avtomatik baholandi</p>
                 
                 <div class="overall-rating" id="overallRating">0.0</div>
+                <div class="age-display" id="ageDisplay">Yosh: <span id="ageValue">0</span></div>
                 <p class="comment" id="ratingComment">Yaxshi ko'rinish!</p>
                 
                 <div class="feature-results">
@@ -361,11 +405,19 @@
             const imagePreview = document.getElementById('imagePreview');
             const loadingIndicator = document.getElementById('loadingIndicator');
             const resultSection = document.getElementById('resultSection');
+            const errorSection = document.getElementById('errorSection');
             const resetBtn = document.getElementById('resetBtn');
+            const tryAgainBtn = document.getElementById('tryAgainBtn');
             const overallRating = document.getElementById('overallRating');
             const ratingComment = document.getElementById('ratingComment');
-            const faceLandmarks = document.getElementById('faceLandmarks');
-            const landmarkedImage = document.getElementById('landmarkedImage');
+            const ageValue = document.getElementById('ageValue');
+            const faceBox = document.getElementById('faceBox');
+            const uploadText = document.getElementById('uploadText');
+            
+            // Yuklash maydonchasining ikonkalari
+            const defaultIcon = uploadArea.querySelector('.default-icon');
+            const successIcon = uploadArea.querySelector('.success-icon');
+            const errorIcon = uploadArea.querySelector('.error-icon');
             
             // Baholash natijalari
             const featureScores = {
@@ -399,15 +451,23 @@
                         imagePreview.style.display = 'block';
                         
                         // Yuklash maydonchasini yangilash
-                        uploadArea.innerHTML = '<i class="fas fa-check-circle"></i><p>Rasm muvaffaqiyatli yuklandi!</p>';
-                        uploadArea.style.borderColor = 'var(--success)';
+                        defaultIcon.style.display = 'none';
+                        successIcon.style.display = 'inline-block';
+                        errorIcon.style.display = 'none';
+                        uploadArea.classList.remove('error');
+                        uploadArea.classList.add('success');
+                        uploadText.innerHTML = 'Rasm muvaffaqiyatli yuklandi! <span style="color: var(--warning); font-weight: bold;">Tahlil qilinmoqda...</span>';
                         
                         // Yuklash indikatorini ko'rsatish
                         loadingIndicator.style.display = 'flex';
                         
-                        // 2 soniya kutib (simulyatsiya qilish uchun), keyin natijani ko'rsatish
+                        // Natija va xato bo'limlarini yashirish
+                        resultSection.style.display = 'none';
+                        errorSection.style.display = 'none';
+                        
+                        // 2 soniya kutib (simulyatsiya qilish uchun), keyin tahlil qilish
                         setTimeout(function() {
-                            analyzeFace(imagePreview.src);
+                            analyzeFace(imagePreview);
                         }, 2000);
                     };
                     
@@ -415,36 +475,69 @@
                 }
             });
             
-            // Yuzni tahlil qilish (simulyatsiya)
-            function analyzeFace(imageSrc) {
+            // Yuzni tahlil qilish
+            function analyzeFace(imageElement) {
                 // Bu haqiqiy loyihada FaceAPI.js yoki boshqa kutubxona bilan almashtiriladi
-                // Hozircha biz tasodifiy natijalar bilan ishlaymiz
+                // Simulyatsiya qilamiz - 80% ehtimollik bilan yuzni topamiz
+                const hasFace = Math.random() > 0.2;
                 
-                // Tasodifiy baholar generatsiya qilish
-                const ratings = {
-                    eyes: (Math.random() * 2 + 3).toFixed(1), // 3-5 oralig'ida
-                    nose: (Math.random() * 2 + 3).toFixed(1),
-                    lips: (Math.random() * 2 + 3).toFixed(1),
-                    jawline: (Math.random() * 2 + 3).toFixed(1)
-                };
+                if (hasFace) {
+                    // Yuzni topdik deb faraz qilamiz
+                    simulateFaceDetection(imageElement);
+                    
+                    // Tasodifiy yosh generatsiya qilish (15-60 oralig'ida)
+                    const age = Math.floor(Math.random() * 45) + 15;
+                    ageValue.textContent = age;
+                    
+                    // Tasodifiy baholar generatsiya qilish
+                    const ratings = {
+                        eyes: (3 + Math.random() * 2).toFixed(1), // 3-5 oralig'ida
+                        nose: (3 + Math.random() * 2).toFixed(1),
+                        lips: (3 + Math.random() * 2).toFixed(1),
+                        jawline: (3 + Math.random() * 2).toFixed(1)
+                    };
+                    
+                    // Umumiy baho
+                    const values = Object.values(ratings).map(Number);
+                    const sum = values.reduce((a, b) => a + b, 0);
+                    const average = (sum / values.length).toFixed(1);
+                    
+                    // Natijalarni ko'rsatish
+                    displayResults(ratings, average);
+                    
+                    // Yuklash maydonchasini yangilash
+                    uploadText.textContent = "Yuz muvaffaqiyatli aniqlandi!";
+                } else {
+                    // Yuzni topolmadik
+                    showError();
+                }
                 
-                // Umumiy baho
-                const values = Object.values(ratings).map(Number);
-                const sum = values.reduce((a, b) => a + b, 0);
-                const average = (sum / values.length).toFixed(1);
+                // Yuklash indikatorini yashirish
+                loadingIndicator.style.display = 'none';
+            }
+            
+            // Yuzni aniqlash simulyatsiyasi
+            function simulateFaceDetection(imageElement) {
+                // Rasm o'lchamlarini olish
+                const width = imageElement.naturalWidth || imageElement.width;
+                const height = imageElement.naturalHeight || imageElement.height;
                 
-                // Natijalarni ko'rsatish
-                displayResults(ratings, average);
+                // Yuz qutisi o'lchamlari (tasodifiy, lekin rasmdan chiqib ketmasligi kerak)
+                const faceWidth = Math.min(width * 0.6, height * 0.6);
+                const faceHeight = faceWidth;
+                const left = (width - faceWidth) / 2;
+                const top = (height - faceHeight) / 3;
                 
-                // Yuz nuqtalarini chizish (simulyatsiya)
-                simulateFaceLandmarks(imageSrc);
+                // Yuz qutisini chizish
+                faceBox.style.display = 'block';
+                faceBox.style.width = `${(faceWidth / width) * 100}%`;
+                faceBox.style.height = `${(faceHeight / height) * 100}%`;
+                faceBox.style.left = `${(left / width) * 100}%`;
+                faceBox.style.top = `${(top / height) * 100}%`;
             }
             
             // Natijalarni ekranga chiqarish
             function displayResults(ratings, overall) {
-                // Yuklash indikatorini yashirish
-                loadingIndicator.style.display = 'none';
-                
                 // Progress barlarni to'ldirish
                 for (const feature in ratings) {
                     featureScores[feature].textContent = ratings[feature];
@@ -474,80 +567,45 @@
                 animateRating(0, numericOverall, 1500);
             }
             
-            // Yuz nuqtalarini chizish (simulyatsiya)
-            function simulateFaceLandmarks(imageSrc) {
-                landmarkedImage.src = imageSrc;
-                faceLandmarks.style.display = 'block';
+            // Xato xabarini ko'rsatish
+            function showError() {
+                // Yuklash maydonchasini yangilash
+                defaultIcon.style.display = 'none';
+                successIcon.style.display = 'none';
+                errorIcon.style.display = 'inline-block';
+                uploadArea.classList.remove('success');
+                uploadArea.classList.add('error');
+                uploadText.textContent = "Yuz aniqlanmadi - boshqa rasm yuklang";
                 
-                // Tasodifiy nuqtalar qo'shish
-                const container = faceLandmarks;
-                const rect = container.getBoundingClientRect();
-                const width = rect.width;
-                const height = rect.height;
+                // Yuz qutisini yashirish
+                faceBox.style.display = 'none';
                 
-                // Oldingi nuqtalarni tozalash
-                const oldPoints = container.querySelectorAll('.landmark-point');
-                oldPoints.forEach(point => point.remove());
-                
-                // 10 ta tasodifiy nuqta qo'shish
-                for (let i = 0; i < 10; i++) {
-                    const point = document.createElement('div');
-                    point.className = 'landmark-point';
-                    
-                    // Tasodifiy pozitsiya (yuz atrofida)
-                    let x, y;
-                    if (i < 2) { // Ko'zlar
-                        x = 0.3 + Math.random() * 0.1 + (i * 0.3);
-                        y = 0.3 + Math.random() * 0.1;
-                    } else if (i < 4) { // Qoshlar
-                        x = 0.25 + Math.random() * 0.1 + ((i-2) * 0.4);
-                        y = 0.25 + Math.random() * 0.1;
-                    } else if (i === 4) { // Burun uch
-                        x = 0.5;
-                        y = 0.4;
-                    } else if (i === 5) { // Lab o'rtasi
-                        x = 0.5;
-                        y = 0.6;
-                    } else if (i === 6) { // Lab burchaklari
-                        x = 0.4;
-                        y = 0.6;
-                    } else if (i === 7) {
-                        x = 0.6;
-                        y = 0.6;
-                    } else { // Jag'
-                        x = 0.3 + Math.random() * 0.4;
-                        y = 0.7 + Math.random() * 0.1;
-                    }
-                    
-                    point.style.left = `${x * 100}%`;
-                    point.style.top = `${y * 100}%`;
-                    
-                    container.appendChild(point);
-                }
+                // Xato bo'limini ko'rsatish
+                errorSection.style.display = 'block';
             }
             
             // Qayta boshlash
-            resetBtn.addEventListener('click', function() {
+            resetBtn.addEventListener('click', resetApp);
+            tryAgainBtn.addEventListener('click', resetApp);
+            
+            function resetApp() {
                 // Tozalash
                 imagePreview.style.display = 'none';
                 imageInput.value = '';
                 resultSection.style.display = 'none';
-                faceLandmarks.style.display = 'none';
+                errorSection.style.display = 'none';
+                faceBox.style.display = 'none';
                 
                 // Yuklash maydonchasini tiklash
-                uploadArea.innerHTML = `
-                    <div class="loading" id="loadingIndicator">
-                        <div class="spinner"></div>
-                        <p>Yuz tahlili qilinmoqda...</p>
-                    </div>
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Yuz rasmingizni shu yerga tortib keling yoki <span style="color: var(--accent); font-weight: bold;">tanlang</span></p>
-                `;
-                uploadArea.style.borderColor = 'var(--secondary)';
+                defaultIcon.style.display = 'inline-block';
+                successIcon.style.display = 'none';
+                errorIcon.style.display = 'none';
+                uploadArea.classList.remove('success', 'error');
+                uploadText.innerHTML = 'Yuz rasmingizni shu yerga tortib keling yoki <span style="color: var(--warning); font-weight: bold;">tanlang</span>';
                 
-                // Loading elementini qayta ta
-                loadingIndicator = document.getElementById('loadingIndicator');
-            });
+                // Loading elementini yashirish
+                loadingIndicator.style.display = 'none';
+            }
             
             // Animatsiya funktsiyasi
             function animateRating(start, end, duration) {
