@@ -1,199 +1,973 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8" />
-  <title>Yuz Chiroyliligi O'lchagich</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-  <style>
-    body {
-      background: linear-gradient(120deg, #f9d423, #ff4e50);
-      min-height: 100vh;
-      color: #222;
-    }
-    .wow-card {
-      background: #fff;
-      border-radius: 2rem;
-      box-shadow: 0 8px 40px 0 rgba(0,0,0,0.2);
-      padding: 2rem;
-      margin-top: 2rem;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .result-section { margin-top: 2rem; }
-    .face-img {
-      max-width: 250px;
-      border-radius: 1rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 4px 20px 0 rgba(0,0,0,0.15);
-    }
-    .score-bar {
-      height: 1.2rem;
-      border-radius: 0.6rem;
-      background: #f5f5f5;
-      overflow: hidden;
-      margin-bottom: 0.5rem;
-    }
-    .score-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #43cea2, #185a9d);
-      transition: width 1s;
-    }
-    .wow-brand {
-      font-family: 'Pacifico', cursive;
-      color: #ff4e50;
-      font-size: 2.4rem;
-      margin-bottom: 1rem;
-      text-shadow: 0 2px 12px #f9d42380;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yuz Baholash Dasturi</title>
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --dark: #292f36;
+            --light: #f7fff7;
+            --accent: #ffd166;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--light), #e0f7fa);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .app-body {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .upload-section {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .upload-area {
+            border: 3px dashed var(--secondary);
+            border-radius: 15px;
+            padding: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: rgba(78, 205, 196, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .upload-area:hover {
+            background-color: rgba(78, 205, 196, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .upload-area i {
+            font-size: 50px;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+        
+        .upload-area p {
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+        
+        #imagePreview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            display: none;
+            margin: 0 auto 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .rating-section {
+            width: 100%;
+            display: none;
+        }
+        
+        .feature-ratings {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-card h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .rating-stars {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .star {
+            font-size: 24px;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .star:hover, .star.active {
+            color: var(--accent);
+        }
+        
+        .result-section {
+            width: 100%;
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(to right, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .overall-rating {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 20px 0;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .overall-rating::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            bottom: -10px;
+            left: 0;
+            border-radius: 5px;
+        }
+        
+        .comment {
+            font-size: 1.2rem;
+            color: var(--dark);
+            margin-top: 15px;
+            font-style: italic;
+        }
+        
+        button {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .feature-progress {
+            height: 8px;
+            background-color: #eee;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .feature-ratings {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-  <div class="container">
-    <div class="wow-card animate__animated animate__fadeInDown">
-      <div class="wow-brand text-center">WOW Yuz Chiroyliligi O'lchagich 😍</div>
-      <form id="faceForm" class="mb-4" autocomplete="off" onsubmit="return false;">
-        <input type="file" id="faceInput" accept="image/*" class="form-control mb-3" required>
-        <button type="submit" class="btn btn-warning btn-lg w-100">Yuzni Baholash</button>
-      </form>
-      <div id="loading" class="text-center text-info" style="display:none;">
-        <div class="spinner-border"></div>
-        <div>Yuz aniqlanmoqda...</div>
-      </div>
-      <div id="result" class="result-section"></div>
+    <div class="container">
+        <header>
+            <h1>Yuz Baholash Dasturi</h1>
+            <p>Yuzingizni rasmini yuklang va biz uni qismlarga bo'lib baholaymiz</p>
+        </header>
+        
+        <div class="app-body">
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Yuz rasmingizni shu yerga tortib keling yoki <span style="color: var(--accent); font-weight: bold;">tanlang</span></p>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                </div>
+                <img id="imagePreview" alt="Yuz rasmi">
+            </div>
+            
+            <div class="rating-section" id="ratingSection">
+                <h2 style="text-align: center; margin-bottom: 20px; color: var(--dark);">Yuzingizni baholang</h2>
+                <div class="feature-ratings">
+                    <div class="feature-card">
+                        <h3>Ko'zlar</h3>
+                        <div class="rating-stars" data-feature="eyes">
+                            <span class="star" data-value="1"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="far fa-star"></i></span>
+                        </div>
+                        <div class="feature-progress">
+                            <div class="progress-bar" id="eyes-progress"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>Burun</h3>
+                        <div class="rating-stars" data-feature="nose">
+                            <span class="star" data-value="1"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="far fa-star"></i></span>
+                        </div>
+                        <div class="feature-progress">
+                            <div class="progress-bar" id="nose-progress"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>Lablar</h3>
+                        <div class="rating-stars" data-feature="lips">
+                            <span class="star" data-value="1"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="far fa-star"></i></span>
+                        </div>
+                        <div class="feature-progress">
+                            <div class="progress-bar" id="lips-progress"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>Jag'</h3>
+                        <div class="rating-stars" data-feature="jawline">
+                            <span class="star" data-value="1"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="far fa-star"></i></span>
+                        </div>
+                        <div class="feature-progress">
+                            <div class="progress-bar" id="jawline-progress"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="calculateBtn">Umumiy bahoni hisoblash</button>
+            </div>
+            
+            <div class="result-section" id="resultSection">
+                <h2>Umumiy baho</h2>
+                <div class="overall-rating" id="overallRating">0.0</div>
+                <p class="comment" id="ratingComment">Yaxshi ko'rinish!</p>
+                <button id="resetBtn">Yana bir bor urinib ko'ring</button>
+            </div>
+        </div>
     </div>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-  <script>
-    // Yuz baholash algoritmi (ko'zlar, burun, og'iz, simmetriya)
-    function rateFace(landmarks) {
-      // Ko'zlar o'rtasidagi masofa / yuz eni
-      const leftEye = landmarks[33]; // chap ko'z tashqarisi
-      const rightEye = landmarks[263]; // o'ng ko'z tashqarisi
-      const eyeDist = Math.hypot(rightEye.x - leftEye.x, rightEye.y - leftEye.y);
 
-      // Yuz eni (chap va o'ng quloq oralig'i)
-      const faceLeft = landmarks[234];
-      const faceRight = landmarks[454];
-      const faceWidth = Math.hypot(faceRight.x - faceLeft.x, faceRight.y - faceLeft.y);
-
-      const eyeRatio = eyeDist / faceWidth;
-      const eyeScore = Math.max(0, 100 - Math.abs(eyeRatio - 0.38) * 400);
-
-      // Burun uzunligi (yuz vertikali)
-      const noseTop = landmarks[168];
-      const noseBottom = landmarks[2];
-      const chin = landmarks[152];
-      const faceHeight = Math.hypot(chin.x - noseTop.x, chin.y - noseTop.y);
-      const noseLength = Math.hypot(noseBottom.x - noseTop.x, noseBottom.y - noseTop.y);
-      const noseRatio = noseLength / faceHeight;
-      const noseScore = Math.max(0, 100 - Math.abs(noseRatio - 0.37) * 480);
-
-      // Og'iz kengligi
-      const mouthLeft = landmarks[61];
-      const mouthRight = landmarks[291];
-      const mouthWidth = Math.hypot(mouthRight.x - mouthLeft.x, mouthRight.y - mouthLeft.y);
-      const mouthRatio = mouthWidth / faceWidth;
-      const mouthScore = Math.max(0, 100 - Math.abs(mouthRatio - 0.43) * 350);
-
-      // Simmetriya: chap va o'ng ko'z balandliklari
-      const symScore = Math.max(0, 100 - Math.abs(landmarks[33].y - landmarks[263].y) * 800);
-
-      // Umumiy baho
-      const overall = Math.round((eyeScore + noseScore + mouthScore + symScore) / 4);
-
-      return {
-        eyeScore: Math.round(eyeScore),
-        noseScore: Math.round(noseScore),
-        mouthScore: Math.round(mouthScore),
-        symScore: Math.round(symScore),
-        overall
-      };
-    }
-
-    // Mediapipe FaceMesh sozlash
-    const faceMesh = new FaceMesh.FaceMesh({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
-    });
-    faceMesh.setOptions({
-      maxNumFaces: 1,
-      refineLandmarks: true,
-      minDetectionConfidence: 0.5,
-      minTrackingConfidence: 0.5
-    });
-
-    const fileInput = document.getElementById('faceInput');
-    const form = document.getElementById('faceForm');
-    const loading = document.getElementById('loading');
-    const resultDiv = document.getElementById('result');
-
-    let img = null;
-    let canvas = document.createElement('canvas');
-    let ctx = canvas.getContext('2d');
-
-    // Formani submit qilishni to'liq to'g'ri ushlab, sayfa yangilanishini to'xtatamiz
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      resultDiv.innerHTML = '';
-      loading.style.display = '';
-      const file = fileInput.files[0];
-      if (!file) return;
-      img = new Image();
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        faceMesh.send({image: img});
-      };
-      img.src = URL.createObjectURL(file);
-      return false;
-    });
-
-    faceMesh.onResults((results) => {
-      loading.style.display = 'none';
-      if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
-        resultDiv.innerHTML =
-        `<div class="alert alert-danger animate__animated animate__bounceIn">
-          <b>Rasmda yuz yo'q!</b><br>Yuz aniqlanmadi. Iltimos, aniq yuzli rasm yuklang.
-        </div>`;
-        return;
-      }
-
-      const landmarks = results.multiFaceLandmarks[0];
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
-      DrawingUtils.drawConnectors(ctx, landmarks, FaceMesh.FACEMESH_TESSELATION, {color: '#00FF00', lineWidth: 1});
-      DrawingUtils.drawConnectors(ctx, landmarks, FaceMesh.FACEMESH_CONTOURS, {color: '#FF3030', lineWidth: 1});
-
-      const imgSrc = canvas.toDataURL();
-      const scores = rateFace(landmarks);
-
-      resultDiv.innerHTML = `
-        <div class="text-center">
-          <img src="${imgSrc}" class="face-img animate__animated animate__fadeIn"/>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elementlari
+            const uploadArea = document.getElementById('uploadArea');
+            const imageInput = document.getElementById('imageInput');
+            const imagePreview = document.getElementById('imagePreview');
+            const ratingSection = document.getElementById('ratingSection');
+            const resultSection = document.getElementById('resultSection');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const overallRating = document.getElementById('overallRating');
+            const ratingComment = document.getElementById('ratingComment');
+            
+            // Baholar obyekti
+            const ratings = {
+                eyes: 0,
+                nose: 0,
+                lips: 0,
+                jawline: 0
+            };
+            
+            // Izohlar massivi
+            const comments = [
+                "Yaxshiroq surat tashlang!",
+                "Yaxshi emas, lekin yomon ham emas!",
+                "O'rtacha ko'rinish!",
+                "Yaxshi ko'rinish!",
+                "Ajoyib ko'rinish!",
+                "Mukammal ko'rinish!"
+            ];
+            
+            // Rasm yuklash
+            uploadArea.addEventListener('click', function() {
+                imageInput.click();
+            });
+            
+            imageInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        imagePreview.src = event.target.result;
+                        imagePreview.style.display = 'block';
+                        ratingSection.style.display = 'block';
+                        
+                        // Yuklash maydonchasini yangilash
+                        uploadArea.innerHTML = '<i class="fas fa-check-circle"></i><p>Rasm muvaffaqiyatli yuklandi!</p>';
+                        uploadArea.style.borderColor = 'var(--accent)';
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Yulduzchalarni baholash
+            document.querySelectorAll('.rating-stars').forEach(starsContainer => {
+                const feature = starsContainer.getAttribute('data-feature');
+                const stars = starsContainer.querySelectorAll('.star');
+                
+                stars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const value = parseInt(this.getAttribute('data-value'));
+                        
+                        // Yulduzchalarni yangilash
+                        stars.forEach((s, index) => {
+                            if (index < value) {
+                                s.innerHTML = '<i class="fas fa-star"></i>';
+                                s.classList.add('active');
+                            } else {
+                                s.innerHTML = '<i class="far fa-star"></i>';
+                                s.classList.remove('active');
+                            }
+                        });
+                        
+                        // Bahoni saqlash
+                        ratings[feature] = value;
+                        
+                        // Progress barni yangilash
+                        const progressBar = document.getElementById(`${feature}-progress`);
+                        progressBar.style.width = `${value * 20}%`;
+                    });
+                });
+            });
+            
+            // Umumiy bahoni hisoblash
+            calculateBtn.addEventListener('click', function() {
+                // Baholarni hisoblash
+                const values = Object.values(ratings);
+                const sum = values.reduce((a, b) => a + b, 0);
+                const average = sum / values.length;
+                
+                // Natijani ko'rsatish
+                overallRating.textContent = average.toFixed(1);
+                
+                // Izohni tanlash
+                let commentIndex;
+                if (average < 1.5) commentIndex = 0;
+                else if (average < 2.5) commentIndex = 1;
+                else if (average < 3.5) commentIndex = 2;
+                else if (average < 4.5) commentIndex = 3;
+                else if (average < 5) commentIndex = 4;
+                else commentIndex = 5;
+                
+                ratingComment.textContent = comments[commentIndex];
+                
+                // Natija bo'limini ko'rsatish
+                resultSection.style.display = 'block';
+                ratingSection.style.display = 'none';
+                
+                // Animatsiya
+                animateRating(0, average, 1500);
+            });
+            
+            // Qayta boshlash
+            resetBtn.addEventListener('click', function() {
+                // Tozalash
+                imagePreview.style.display = 'none';
+                imageInput.value = '';
+                ratingSection.style.display = 'none';
+                resultSection.style.display = 'none';
+                
+                // Yuklash maydonchasini tiklash
+                uploadArea.innerHTML = '<i class="fas fa-cloud-upload-alt"></i><p>Yuz rasmingizni shu yerga tortib keling yoki <span style="color: var(--accent); font-weight: bold;">tanlang</span></p>';
+                uploadArea.style.borderColor = 'var(--secondary)';
+                
+                // Baholarni tozalash
+                for (let feature in ratings) {
+                    ratings[feature] = 0;
+                    document.getElementById(`${feature}-progress`).style.width = '0%';
+                    
+                    const stars = document.querySelectorAll(`.rating-stars[data-feature="${feature}"] .star`);
+                    stars.forEach(star => {
+                        star.innerHTML = '<i class="far fa-star"></i>';
+                        star.classList.remove('active');
+                    });
+                }
+            });
+            
+            // Animatsiya funktsiyasi
+            function animateRating(start, end, duration) {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const value = start + progress * (end - start);
+                    overallRating.textContent = value.toFixed(1);
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+        });
+    </script>
+</body>
+                  </html><!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yuz Baholash Dasturi</title>
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --dark: #292f36;
+            --light: #f7fff7;
+            --accent: #ffd166;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--light), #e0f7fa);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .app-body {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .upload-section {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .upload-area {
+            border: 3px dashed var(--secondary);
+            border-radius: 15px;
+            padding: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: rgba(78, 205, 196, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .upload-area:hover {
+            background-color: rgba(78, 205, 196, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .upload-area i {
+            font-size: 50px;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+        
+        .upload-area p {
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+        
+        #imagePreview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            display: none;
+            margin: 0 auto 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .rating-section {
+            width: 100%;
+            display: none;
+        }
+        
+        .feature-ratings {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-card h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .rating-stars {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .star {
+            font-size: 24px;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .star:hover, .star.active {
+            color: var(--accent);
+        }
+        
+        .result-section {
+            width: 100%;
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(to right, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .overall-rating {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 20px 0;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .overall-rating::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            bottom: -10px;
+            left: 0;
+            border-radius: 5px;
+        }
+        
+        .comment {
+            font-size: 1.2rem;
+            color: var(--dark);
+            margin-top: 15px;
+            font-style: italic;
+        }
+        
+        button {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .feature-progress {
+            height: 8px;
+            background-color: #eee;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .feature-ratings {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Yuz Baholash Dasturi</h1>
+            <p>Yuzingizni rasmini yuklang va biz uni qismlarga bo'lib baholaymiz</p>
+        </header>
+        
+        <div class="app-body">
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Yuz rasmingizni shu yerga tortib keling yoki <span style="color: var(--accent); font-weight: bold;">tanlang</span></p>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                </div>
+                <img id="imagePreview" alt="Yuz rasmi">
+            </div>
+            
+            <div class="rating-section" id="ratingSection">
+                <h2 style="text-align: center; margin-bottom: 20px; color: var(--dark);">Yuzingizni baholang</h2>
+                <div class="feature-ratings">
+                    <div class="feature-card">
+                        <h3>Ko'zlar</h3>
+                        <div class="rating-stars" data-feature="eyes">
+                            <span class="star" data-value="1"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="far fa-star"></i></span>
+                        </div>
+                        <div class="feature-progress">
+                            <div class="progress-bar" id="eyes-progress"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>Burun</h3>
+                        <div class="rating-stars" data-feature="nose">
+                            <span class="star" data-value="1"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="far fa-star"></i></span>
+                        </div>
+                        <div class="feature-progress">
+                            <div class="progress-bar" id="nose-progress"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>Lablar</h3>
+                        <div class="rating-stars" data-feature="lips">
+                            <span class="star" data-value="1"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="far fa-star"></i></span>
+                        </div>
+                        <div class="feature-progress">
+                            <div class="progress-bar" id="lips-progress"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>Jag'</h3>
+                        <div class="rating-stars" data-feature="jawline">
+                            <span class="star" data-value="1"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="far fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="far fa-star"></i></span>
+                        </div>
+                        <div class="feature-progress">
+                            <div class="progress-bar" id="jawline-progress"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="calculateBtn">Umumiy bahoni hisoblash</button>
+            </div>
+            
+            <div class="result-section" id="resultSection">
+                <h2>Umumiy baho</h2>
+                <div class="overall-rating" id="overallRating">0.0</div>
+                <p class="comment" id="ratingComment">Yaxshi ko'rinish!</p>
+                <button id="resetBtn">Yana bir bor urinib ko'ring</button>
+            </div>
         </div>
-        <div class="score-bar mb-2"><div class="score-fill" style="width: ${scores.eyeScore}%;"></div></div>
-        <b>Ko'zlar nisbati:</b> <span>${scores.eyeScore}/100</span><br>
-        <div class="score-bar mb-2"><div class="score-fill" style="width: ${scores.noseScore}%;"></div></div>
-        <b>Burun uzunligi:</b> <span>${scores.noseScore}/100</span><br>
-        <div class="score-bar mb-2"><div class="score-fill" style="width: ${scores.mouthScore}%;"></div></div>
-        <b>Og'iz kengligi:</b> <span>${scores.mouthScore}/100</span><br>
-        <div class="score-bar mb-2"><div class="score-fill" style="width: ${scores.symScore}%;"></div></div>
-        <b>Simmetriya:</b> <span>${scores.symScore}/100</span><br>
-        <hr>
-        <div class="display-5 fw-bold text-center text-success animate__animated animate__pulse">
-          Umumiy baho: <span>${scores.overall}/100</span>
-        </div>
-        <div class="text-center mt-2">
-          <span style="font-size:2rem;">${
-            scores.overall > 85 ? '😍' : (scores.overall > 60 ? '😊' : '🙂')
-          }</span>
-        </div>
-      `;
-    });
-  </script>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elementlari
+            const uploadArea = document.getElementById('uploadArea');
+            const imageInput = document.getElementById('imageInput');
+            const imagePreview = document.getElementById('imagePreview');
+            const ratingSection = document.getElementById('ratingSection');
+            const resultSection = document.getElementById('resultSection');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const overallRating = document.getElementById('overallRating');
+            const ratingComment = document.getElementById('ratingComment');
+            
+            // Baholar obyekti
+            const ratings = {
+                eyes: 0,
+                nose: 0,
+                lips: 0,
+                jawline: 0
+            };
+            
+            // Izohlar massivi
+            const comments = [
+                "Yaxshiroq surat tashlang!",
+                "Yaxshi emas, lekin yomon ham emas!",
+                "O'rtacha ko'rinish!",
+                "Yaxshi ko'rinish!",
+                "Ajoyib ko'rinish!",
+                "Mukammal ko'rinish!"
+            ];
+            
+            // Rasm yuklash
+            uploadArea.addEventListener('click', function() {
+                imageInput.click();
+            });
+            
+            imageInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        imagePreview.src = event.target.result;
+                        imagePreview.style.display = 'block';
+                        ratingSection.style.display = 'block';
+                        
+                        // Yuklash maydonchasini yangilash
+                        uploadArea.innerHTML = '<i class="fas fa-check-circle"></i><p>Rasm muvaffaqiyatli yuklandi!</p>';
+                        uploadArea.style.borderColor = 'var(--accent)';
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Yulduzchalarni baholash
+            document.querySelectorAll('.rating-stars').forEach(starsContainer => {
+                const feature = starsContainer.getAttribute('data-feature');
+                const stars = starsContainer.querySelectorAll('.star');
+                
+                stars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const value = parseInt(this.getAttribute('data-value'));
+                        
+                        // Yulduzchalarni yangilash
+                        stars.forEach((s, index) => {
+                            if (index < value) {
+                                s.innerHTML = '<i class="fas fa-star"></i>';
+                                s.classList.add('active');
+                            } else {
+                                s.innerHTML = '<i class="far fa-star"></i>';
+                                s.classList.remove('active');
+                            }
+                        });
+                        
+                        // Bahoni saqlash
+                        ratings[feature] = value;
+                        
+                        // Progress barni yangilash
+                        const progressBar = document.getElementById(`${feature}-progress`);
+                        progressBar.style.width = `${value * 20}%`;
+                    });
+                });
+            });
+            
+            // Umumiy bahoni hisoblash
+            calculateBtn.addEventListener('click', function() {
+                // Baholarni hisoblash
+                const values = Object.values(ratings);
+                const sum = values.reduce((a, b) => a + b, 0);
+                const average = sum / values.length;
+                
+                // Natijani ko'rsatish
+                overallRating.textContent = average.toFixed(1);
+                
+                // Izohni tanlash
+                let commentIndex;
+                if (average < 1.5) commentIndex = 0;
+                else if (average < 2.5) commentIndex = 1;
+                else if (average < 3.5) commentIndex = 2;
+                else if (average < 4.5) commentIndex = 3;
+                else if (average < 5) commentIndex = 4;
+                else commentIndex = 5;
+                
+                ratingComment.textContent = comments[commentIndex];
+                
+                // Natija bo'limini ko'rsatish
+                resultSection.style.display = 'block';
+                ratingSection.style.display = 'none';
+                
+                // Animatsiya
+                animateRating(0, average, 1500);
+            });
+            
+            // Qayta boshlash
+            resetBtn.addEventListener('click', function() {
+                // Tozalash
+                imagePreview.style.display = 'none';
+                imageInput.value = '';
+                ratingSection.style.display = 'none';
+                resultSection.style.display = 'none';
+                
+                // Yuklash maydonchasini tiklash
+                uploadArea.innerHTML = '<i class="fas fa-cloud-upload-alt"></i><p>Yuz rasmingizni shu yerga tortib keling yoki <span style="color: var(--accent); font-weight: bold;">tanlang</span></p>';
+                uploadArea.style.borderColor = 'var(--secondary)';
+                
+                // Baholarni tozalash
+                for (let feature in ratings) {
+                    ratings[feature] = 0;
+                    document.getElementById(`${feature}-progress`).style.width = '0%';
+                    
+                    const stars = document.querySelectorAll(`.rating-stars[data-feature="${feature}"] .star`);
+                    stars.forEach(star => {
+                        star.innerHTML = '<i class="far fa-star"></i>';
+                        star.classList.remove('active');
+                    });
+                }
+            });
+            
+            // Animatsiya funktsiyasi
+            function animateRating(start, end, duration) {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const value = start + progress * (end - start);
+                    overallRating.textContent = value.toFixed(1);
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+        });
+    </script>
 </body>
 </html>
+
+                                                                </html>
